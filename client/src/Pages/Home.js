@@ -28,6 +28,7 @@ function Home() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { language, setLanguage } = useContext(LanguageContext);
   const [problems, setProblems] = useState([]); // array of objects of problems
+  const [allProfiles, setAllProfiles] = useState([]); // array of objects of profiles
   const btnRef = React.useRef();
   const navigate = useNavigate();
   const base_url = process.env.REACT_APP_BASE_URL;
@@ -41,6 +42,16 @@ function Home() {
       .then((res) => {
         // console.log(res.data);
         setProblems(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    axios
+      .get(`${base_url}/api/auth/allProfiles`)
+      .then((res) => {
+        console.log(res.data);
+        setAllProfiles(res.data);
       })
       .catch((err) => {
         console.log(err);

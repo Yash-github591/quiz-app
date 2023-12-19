@@ -35,6 +35,7 @@ const Navbar = () => {
       .get(`${base_url}/api/auth/currentUser`, { withCredentials: true })
       .then((res) => {
         setUser(res.data);
+        console.log(res.data);
       })
       .catch((err) => {
         // if the user is not logged in, redirect them to the login page

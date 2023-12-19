@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   subjects_administered: { type: Array, default: [] },
   completed_exercises: { type: Array, default: [] }, // stores the id of the completed exercises
+  subject_scores: { type: Object, default: {} },
 });
 
 const UserModel = mongoose.model("User", UserSchema);

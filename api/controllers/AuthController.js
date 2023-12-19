@@ -4,8 +4,13 @@ const bcrypt = require("bcryptjs");
 const saltRounds = 10;
 
 const register = async (req, res) => {
-  const { username, password, subjects_managed, completed_exercises, score } =
-    req.body;
+  const {
+    username,
+    password,
+    subjects_managed,
+    completed_exercises,
+    subject_scores,
+  } = req.body;
   const isExisting = await UserModel.findOne({ username });
 
   if (isExisting) {
@@ -16,9 +21,8 @@ const register = async (req, res) => {
     const userDoc = await UserModel.create({
       username,
       password: bcrypt.hashSync(password, saltRounds),
-      subjects_managed,
-      completed_exercises,
-      score,
+      completed_exercises: [],
+      subject_scores: {},
     });
 
     // generate a token
@@ -26,9 +30,8 @@ const register = async (req, res) => {
       {
         username,
         id: userDoc._id,
-        subjects_managed,
-        completed_exercises,
-        score,
+        completed_exercises: [],
+        subject_scores: {},
       },
       process.env.SECRET_KEY,
       (err, token) => {
@@ -45,9 +48,8 @@ const register = async (req, res) => {
             .json({
               username,
               id: userDoc._id,
-              subjects_managed,
               completed_exercises,
-              score,
+              subject_scores,
             });
         }
       }
@@ -67,7 +69,12 @@ const login = async (req, res) => {
     if (passOk) {
       // Generate a token
       jwt.sign(
-        { username, id: userDoc._id },
+        {
+          username,
+          id: userDoc._id,
+          completed_exercises: userDoc.completed_exercises,
+          subject_scores: userDoc.subject_scores,
+        },
         process.env.SECRET_KEY,
         (err, token) => {
           if (err) {
@@ -83,6 +90,7 @@ const login = async (req, res) => {
                 username,
                 id: userDoc._id,
                 completed_exercises: userDoc.completed_exercises,
+                subject_scores: userDoc.subject_scores,
               });
           }
         }
@@ -109,6 +117,16 @@ const getProfile = (req, res) => {
   res.status(200).json(req.user); // req.user is the user object from the token added by the checkLogin middleware
 };
 
+const getAllProfiles = async (req, res) => {
+  try {
+    const userData = await UserModel.find({}).select("-password");
+    res.status(200).json(userData);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 const getProfileById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -123,4 +141,32 @@ const getProfileById = async (req, res) => {
   }
 };
 
-module.exports = { register, login, logout, getProfile, getProfileById };
+const updateProfile = async (req, res) => {
+  const { id, username, completed_exercises, subject_scores } = req.body;
+  try {
+    const userDoc = await UserModel.findById(id);
+    if (!userDoc) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    await userDoc.updateOne({
+      username,
+      password: userDoc.password,
+      completed_exercises,
+      subject_scores,
+    });
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  logout,
+  getProfile,
+  getAllProfiles,
+  getProfileById,
+  updateProfile,
+};
