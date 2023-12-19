@@ -3,6 +3,7 @@ const ProblemModel = require("../models/Problem");
 
 // Middleware to check if the user is logged in
 function checkLogin(req, res, next) {
+  console.log(req.data);
   const token = req.cookies.token;
 
   if (!token) {
@@ -26,16 +27,16 @@ async function checkIsAuthor(req, res, next) {
   try {
     const { id } = req.params;
 
-    const vehicleDoc = await ProblemModel.findById(id);
+    const problemDoc = await ProblemModel.findById(id);
 
-    if (!vehicleDoc) {
+    if (!problemDoc) {
       return res.status(404).json({ error: "Problem not found" });
     }
 
-    const isOwner =
-      JSON.stringify(vehicleDoc.owner) === JSON.stringify(req.user.id);
+    const isAuthor =
+      JSON.stringify(problemDoc.contributor) === JSON.stringify(req.user.id);
 
-    if (!isOwner) {
+    if (!isAuthor) {
       return res
         .status(403)
         .json({ error: "Forbidden: You are not the author of this problem" });

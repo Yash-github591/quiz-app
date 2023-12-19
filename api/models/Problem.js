@@ -3,8 +3,12 @@ const { Schema, model } = mongoose;
 
 const ProblemSchema = new Schema({
   contributor: { type: Schema.Types.ObjectId, ref: "User" },
-  difficulty: { type: String, required: true },
-  subject: { type: String, required: true },
+  difficulty: { type: Number, required: true },
+  subject: {
+    type: String,
+    enum: ["Hindi", "English", "French", "Japanese"],
+    required: true,
+  },
   answer: { type: String, required: true },
   problem_statement: { type: String, required: true },
 });

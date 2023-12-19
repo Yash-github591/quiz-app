@@ -82,6 +82,7 @@ const login = async (req, res) => {
               .json({
                 username,
                 id: userDoc._id,
+                completed_exercises: userDoc.completed_exercises,
               });
           }
         }

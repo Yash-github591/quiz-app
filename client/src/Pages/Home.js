@@ -16,21 +16,40 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
+import { LanguageContext } from "../Context/LanguageContext";
+import ProblemCard from "../Components/ProblemCard";
 
 function Home() {
   const { user, setUser } = useContext(UserContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { language, setLanguage } = useContext(LanguageContext);
+  const [problems, setProblems] = useState([]); // array of objects of problems
   const btnRef = React.useRef();
   const navigate = useNavigate();
+  const base_url = process.env.REACT_APP_BASE_URL;
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
+    axios
+      .get(`${base_url}/api/problems`)
+      .then((res) => {
+        // console.log(res.data);
+        setProblems(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
+
+  // useEffect(() => {
+  //   console.log(problems);
+  // }, [problems]);
 
   return (
     <>
@@ -43,38 +62,81 @@ function Home() {
       >
         <Menu>
           <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-            Select Language
+            Select Language ({language == "" ? "Not Selected" : language})
           </MenuButton>
           <MenuList>
-            <MenuItem>Download</MenuItem>
-            <MenuItem>Create a Copy</MenuItem>
-            <MenuItem>Mark as Draft</MenuItem>
-            <MenuItem>Delete</MenuItem>
-            <MenuItem>Attend a Workshop</MenuItem>
+            <MenuItem
+              onClick={() => {
+                setLanguage("");
+              }}
+            >
+              Select Language
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setLanguage("Hindi");
+              }}
+            >
+              Hindi
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setLanguage("English");
+              }}
+            >
+              English
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setLanguage("French");
+              }}
+            >
+              French
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setLanguage("Japanese");
+              }}
+            >
+              Japanese
+            </MenuItem>
           </MenuList>
 
-          <>
-            <Button ref={btnRef} colorScheme="teal" onClick={onOpen}>
-              View Leaderboard
-            </Button>
-            <Drawer
-              isOpen={isOpen}
-              placement="right"
-              onClose={onClose}
-              finalFocusRef={btnRef}
-            >
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Top Performers</DrawerHeader>
+          {language != "" && (
+            <>
+              <Button ref={btnRef} colorScheme="teal" onClick={onOpen}>
+                View Leaderboard ({language})
+              </Button>
+              <Drawer
+                isOpen={isOpen}
+                placement="right"
+                onClose={onClose}
+                finalFocusRef={btnRef}
+              >
+                <DrawerOverlay />
+                <DrawerContent>
+                  <DrawerCloseButton />
+                  <DrawerHeader>Top Performers in {language}</DrawerHeader>
 
-                <DrawerBody></DrawerBody>
-              </DrawerContent>
-            </Drawer>
-          </>
+                  <DrawerBody></DrawerBody>
+                </DrawerContent>
+              </Drawer>
+            </>
+          )}
         </Menu>
       </div>
-      <Box>Home</Box>
+      {language != "" && (
+        <Box>
+          <Text fontSize="3xl">{language} Problems:-</Text>
+          <Box>
+            {problems
+              .filter((problem) => problem.subject == language)
+              .map((problem, idx) => {
+                return <ProblemCard problem={problem} />;
+              })}
+          </Box>
+        </Box>
+      )}
     </>
   );
 }

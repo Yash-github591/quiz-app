@@ -54,6 +54,10 @@ const Navbar = () => {
       });
   };
 
+  const handleAddProblem = () => {
+    navigate("/addProblem");
+  };
+
   return (
     <ChakraProvider>
       <Flex p="4" bg="blue.500" color="white">
@@ -77,26 +81,15 @@ const Navbar = () => {
               />
               <MenuList>
                 <MenuItem style={{ color: "black" }}>Profile</MenuItem>
+                <MenuItem style={{ color: "black" }} onClick={handleAddProblem}>
+                  Add Problem
+                </MenuItem>
                 <MenuItem style={{ color: "black" }} onClick={handleLogout}>
                   Logout
                 </MenuItem>
               </MenuList>
             </Menu>
           </Box>
-        )}
-        {!user && (
-          <HStack>
-            <Box>
-              <Link to="/login">
-                <ChakraLink>Login</ChakraLink>
-              </Link>
-            </Box>
-            <Box>
-              <Link to="/register">
-                <ChakraLink>Register</ChakraLink>
-              </Link>
-            </Box>
-          </HStack>
         )}
       </Flex>
     </ChakraProvider>
